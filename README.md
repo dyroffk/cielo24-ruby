@@ -1,9 +1,9 @@
-Ruby
-----
+cielo24 Ruby API Library
+========================
 
 * Core gem path:
 
-    cielo24_Ruby/cielo24_gem/cielo24-X.X.X.gem *(depends on httpclient, hashie)*
+    cielo24_gem/cielo24-X.X.X.gem  *(depends on httpclient, hashie)*
     
 * Ruby Gems:
 
@@ -16,8 +16,12 @@ Ruby
       `gem install cielo24-cli`
       
     Usage: `cielo24cli [action] [options]`
+
     More information can be found here: https://rubygems.org/gems/cielo24-cli
     
 * Command Line Interface gem path:
 
-    cielo24_Ruby/cielo24_command/cielo24-cli-X.X.X.gem *(depends on cielo24, thor)*
+    cielo24_command/cielo24-cli-X.X.X.gem  *(depends on cielo24, thor)*
+
+
+For a detailed API documentation visit: http://docs.cielo24.com/en/latest/
