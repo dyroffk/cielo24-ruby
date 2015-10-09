@@ -31,6 +31,7 @@ module Cielo24
     GET_CAPTION_PATH = '/api/job/get_caption'
     GET_ELEMENT_LIST_PATH = '/api/job/get_elementlist'
     GET_LIST_OF_ELEMENT_LISTS_PATH = '/api/job/list_elementlists'
+    AGGREGATE_STATISTICS_PATH = '/api/job/aggregate_statistics'
 
     def initialize(base_url='https://api.cielo24.com')
       @base_url = base_url
@@ -212,6 +213,17 @@ module Cielo24
       query_hash = init_job_req_dict(api_token, job_id)
       response = WebUtils.get_json(@base_url + GET_LIST_OF_ELEMENT_LISTS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
       return response
+    end
+
+    def aggregate_statistics(api_token, metrics=nil, group_by=nil, start_date=nil, end_date=nil, account_id=nil)
+      query_hash = init_access_req_dict(api_token)
+      query_hash[:metrics] = metrics.to_json unless metrics.nil?
+      query_hash[:group_by] = group_by unless group_by.nil?
+      query_hash[:start_date] = start_date unless start_date.nil?
+      query_hash[:end_date] = end_date unless end_date.nil?
+      query_hash[:account_id] = account_id unless account_id.nil?
+      response = WebUtils.get_json(@base_url + AGGREGATE_STATISTICS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
+      return Mash.new(response)
     end
 
     ##############################

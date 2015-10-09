@@ -106,4 +106,14 @@ class JobTest < ActionsTest
     @task_id = @actions.add_media_to_job_file(@api_token, @job_id, file)
     assert_equal(32, @task_id.length)
   end
+
+  def test_aggregate_statistics
+    response = @actions.aggregate_statistics(@api_token,
+                                             metrics=%w(billable_minutes_total),
+                                             group_by='month',
+                                             start_date='2015-03-25T11:35:46.993607',
+                                             end_date='2015-06-25T11:35:46.993607',
+                                             account_id='*')
+
+  end
 end
