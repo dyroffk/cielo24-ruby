@@ -26,7 +26,7 @@ class ActionsTest < Test::Unit::TestCase
     begin
       @actions.remove_api_key(@api_token, @secure_key)
     rescue WebError => e
-      if e.type == 'ACCOUNT_UNPRIVILEGED'
+      if e.type == ErrorType::ACCOUNT_UNPRIVILEGED
         @api_token = @actions.login(@config.username, @config.password, nil, true)
         @actions.remove_api_key(@api_token, @secure_key)
       else
