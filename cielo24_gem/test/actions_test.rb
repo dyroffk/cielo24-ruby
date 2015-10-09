@@ -19,4 +19,19 @@ class ActionsTest < Test::Unit::TestCase
     @api_token = @actions.login(@config.username, @config.password, nil, true)
     @secure_key = @actions.generate_api_key(@api_token, @config.username, false)
   end
+
+  # Called after every test method runs. Can be used to tear down fixture information.
+  def teardown
+    # Remove secure key
+    begin
+      @actions.remove_api_key(@api_token, @secure_key)
+    rescue WebError => e
+      if e.type == 'ACCOUNT_UNPRIVILEGED'
+        @api_token = @actions.login(@config.username, @config.password, nil, true)
+        @actions.remove_api_key(@api_token, @secure_key)
+      else
+        # Pass silently
+      end
+    end
+  end
 end
