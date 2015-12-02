@@ -22,4 +22,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'httpclient', '~> 2.6.0.1'
   spec.add_dependency 'hashie', '~> 3.4.2'
+  spec.add_dependency 'tzinfo', '~> 1.2.2'
 end

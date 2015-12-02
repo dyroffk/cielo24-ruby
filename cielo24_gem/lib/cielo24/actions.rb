@@ -126,14 +126,14 @@ module Cielo24
     def get_job_info(api_token, job_id)
       query_hash = init_job_req_dict(api_token, job_id)
       response = WebUtils.get_json(@base_url + GET_JOB_INFO_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      Mash.new(response)
+      fix_job_info_offsets Mash.new(response)
     end
 
     def get_job_list(api_token, options=nil)
       query_hash = init_access_req_dict(api_token)
       query_hash.merge!(options.get_hash) unless options.nil?
       response = WebUtils.get_json(@base_url + GET_JOB_LIST_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      Mash.new(response)
+      fix_job_list_offsets Mash.new(response)
     end
 
     def add_media_to_job_file(api_token, job_id, media_file)
@@ -210,8 +210,7 @@ module Cielo24
 
     def get_list_of_element_lists(api_token, job_id)
       query_hash = init_job_req_dict(api_token, job_id)
-      response = WebUtils.get_json(@base_url + GET_LIST_OF_ELEMENT_LISTS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      response
+      WebUtils.get_json(@base_url + GET_LIST_OF_ELEMENT_LISTS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
     end
 
     ##############################
@@ -245,6 +244,21 @@ module Cielo24
       if arg.nil?
         raise ArgumentError.new('Invalid argument - ' + arg_name)
       end
+    end
+
+    def fix_job_info_offsets(job_info)
+      keys = %w(CreationDate StartDate DueDate CompletedDate ReturnDate AuthorizationDate)
+      keys.each do |key|
+        job_info[key] = WebUtils.to_utc(job_info[key])
+      end
+      job_info
+    end
+
+    def fix_job_list_offsets(job_list)
+      job_list.ActiveJobs = job_list.ActiveJobs.map do |job|
+        fix_job_info_offsets job
+      end
+      job_list
     end
   end
 end
