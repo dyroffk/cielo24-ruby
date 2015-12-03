@@ -247,18 +247,29 @@ module Cielo24
     end
 
     def fix_job_info_offsets(job_info)
-      keys = %w(CreationDate StartDate DueDate CompletedDate ReturnDate AuthorizationDate)
-      keys.each do |key|
-        job_info[key] = WebUtils.to_utc(job_info[key])
+      top_keys = %w(CreationDate StartDate DueDate CompletedDate ReturnDate AuthorizationDate)
+      task_keys = %w(TaskRequestTime)
+      job_info = fix_offsets(job_info, top_keys)
+      job_info.Tasks = job_info.Tasks.map do |task_item|
+        fix_offsets(task_item, task_keys)
       end
       job_info
     end
 
     def fix_job_list_offsets(job_list)
-      job_list.ActiveJobs = job_list.ActiveJobs.map do |job|
-        fix_job_info_offsets job
+      keys = %w(CreationDate CreationTime StartDate StartTime DueDate CompletedDate
+                ReturnDate CompletedTime AuthorizationDate)
+      job_list.ActiveJobs = job_list.ActiveJobs.map do |job_item|
+        fix_offsets(job_item, keys)
       end
       job_list
+    end
+
+    def fix_offsets(hash, keys)
+      keys.each do |key|
+        hash[key] = WebUtils.to_utc(hash[key])
+      end
+      hash
     end
   end
 end
