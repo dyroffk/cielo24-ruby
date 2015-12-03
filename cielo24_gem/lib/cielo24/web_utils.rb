@@ -50,7 +50,8 @@ module Cielo24
       tz = TZInfo::Timezone.get(SERVER_TZ)
       local = DateTime.iso8601(s)
       utc = tz.local_to_utc local
-      utc.iso8601
+      format = '%Y-%m-%dT%H:%M:%S.%L%z' # iso8601 with milliseconds
+      utc.strftime(format)
     end
   end
 
