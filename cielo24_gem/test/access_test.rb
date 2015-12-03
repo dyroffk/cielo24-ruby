@@ -39,6 +39,7 @@ class AccessTest < ActionsTest
       fail('Should not be able to use the API with invalid API token')
     rescue WebError => e
       assert_equal(ErrorType::BAD_API_TOKEN, e.type, 'Unexpected error type')
+      assert_equal(400, e.status_code, 'Unexpected http status code')
     end
   end
 
@@ -62,6 +63,7 @@ class AccessTest < ActionsTest
       fail('Should not be able to login using invalid API key')
     rescue WebError => e
       assert_equal(ErrorType::ACCOUNT_UNPRIVILEGED, e.type, 'Unexpected error type')
+      assert_equal(400, e.status_code, 'Unexpected http status code')
     end
   end
 

@@ -33,8 +33,12 @@ module Cielo24
           if response.status_code == 200 or response.status_code == 204
             return response.body
           else
-            json = JSON.parse(response.body)
-            raise WebError.new(json['ErrorType'], json['ErrorComment'])
+            begin
+              json = JSON.parse(response.body)
+              raise WebError.new(response.status_code, json['ErrorType'], json['ErrorComment'])
+            rescue JSON::ParserError
+              raise WebError.new(response.status_code, ErrorType::UNKNOWN, "Response: #{response.body}")
+            end
           end
 
         }
@@ -45,14 +49,16 @@ module Cielo24
   end
 
   class WebError < StandardError
+    attr_reader :status_code
     attr_reader :type
-    def initialize(type, comment)
+    def initialize(status_code, type, comment)
       super(comment)
+      @status_code = status_code
       @type = type
     end
 
     def to_s
-      return @type + ' - ' + super.to_s
+      "#{status_code}:#{@type} - #{super.to_s}"
     end
   end
 
