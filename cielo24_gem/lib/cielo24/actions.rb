@@ -58,7 +58,7 @@ module Cielo24
       end
 
       response = WebUtils.get_json(@base_url + LOGIN_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash, headers)
-      return response['ApiToken']
+      response['ApiToken']
     end
 
     def logout(api_token)
@@ -83,7 +83,7 @@ module Cielo24
       query_hash[:account_id] = username
       query_hash[:force_new] = force_new
       response = WebUtils.get_json(@base_url + GENERATE_API_KEY_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return response['ApiKey']
+      response['ApiKey']
     end
 
     def remove_api_key(api_token, api_securekey)
@@ -108,7 +108,7 @@ module Cielo24
 
       response = WebUtils.get_json(@base_url + CREATE_JOB_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
       # Return a hash with JobId and TaskId
-      return Mash.new(response)
+      Mash.new(response)
     end
 
     def authorize_job(api_token, job_id)
@@ -120,20 +120,20 @@ module Cielo24
     def delete_job(api_token, job_id)
       query_hash = init_job_req_dict(api_token, job_id)
       response = WebUtils.get_json(@base_url + DELETE_JOB_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return response['TaskId']
+      response['TaskId']
     end
 
     def get_job_info(api_token, job_id)
       query_hash = init_job_req_dict(api_token, job_id)
       response = WebUtils.get_json(@base_url + GET_JOB_INFO_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return Mash.new(response)
+      fix_job_info_offsets Mash.new(response)
     end
 
     def get_job_list(api_token, options=nil)
       query_hash = init_access_req_dict(api_token)
       query_hash.merge!(options.get_hash) unless options.nil?
       response = WebUtils.get_json(@base_url + GET_JOB_LIST_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return Mash.new(response)
+      fix_job_list_offsets Mash.new(response)
     end
 
     def add_media_to_job_file(api_token, job_id, media_file)
@@ -142,21 +142,21 @@ module Cielo24
       file_size = File.size(media_file.path)
       response = WebUtils.get_json(@base_url + ADD_MEDIA_TO_JOB_PATH, 'POST', nil, query_hash,
                                    {'Content-Type' => 'video/mp4', 'Content-Length' => file_size}, media_file)
-      return response['TaskId']
+      response['TaskId']
     end
 
     def add_media_to_job_url(api_token, job_id, media_url)
-      return send_media_url(api_token, job_id, media_url, ADD_MEDIA_TO_JOB_PATH)
+      send_media_url(api_token, job_id, media_url, ADD_MEDIA_TO_JOB_PATH)
     end
 
     def add_media_to_job_embedded(api_token, job_id, media_url)
-      return send_media_url(api_token, job_id, media_url, ADD_EMBEDDED_MEDIA_TO_JOB_PATH)
+      send_media_url(api_token, job_id, media_url, ADD_EMBEDDED_MEDIA_TO_JOB_PATH)
     end
 
     def get_media(api_token, job_id)
       query_hash = init_job_req_dict(api_token, job_id)
       response = WebUtils.get_json(@base_url + GET_MEDIA_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return response['MediaUrl']
+      response['MediaUrl']
     end
 
     def perform_transcription(api_token,
@@ -177,14 +177,14 @@ module Cielo24
       query_hash[:options] = options.get_hash.to_json unless options.nil?
 
       response = WebUtils.get_json(@base_url + PERFORM_TRANSCRIPTION, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return response['TaskId']
+      response['TaskId']
     end
 
     def get_transcript(api_token, job_id, transcript_options=nil)
       query_hash = init_job_req_dict(api_token, job_id)
       query_hash.merge!(transcript_options.get_hash) unless transcript_options.nil?
       # Returns raw transcript text
-      return WebUtils.http_request(@base_url + GET_TRANSCRIPT_PATH, 'GET', WebUtils::DOWNLOAD_TIMEOUT, query_hash)
+      WebUtils.http_request(@base_url + GET_TRANSCRIPT_PATH, 'GET', WebUtils::DOWNLOAD_TIMEOUT, query_hash)
     end
 
     def get_caption(api_token, job_id, caption_format, caption_options=nil)
@@ -195,9 +195,9 @@ module Cielo24
 
       response = WebUtils.http_request(@base_url + GET_CAPTION_PATH, 'GET', WebUtils::DOWNLOAD_TIMEOUT, query_hash)
       if not caption_options.nil? and caption_options.build_url # If build_url is true
-        return JSON.parse(response)['CaptionUrl']
+        JSON.parse(response)['CaptionUrl']
       else
-        return response # Else return raw caption text
+        response # Else return raw caption text
       end
     end
 
@@ -205,13 +205,12 @@ module Cielo24
       query_hash = init_job_req_dict(api_token, job_id)
       query_hash[:elementlist_version] = elementlist_version unless elementlist_version.nil?
       response = WebUtils.get_json(@base_url + GET_ELEMENT_LIST_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return Mash.new(response)
+      Mash.new(response)
     end
 
     def get_list_of_element_lists(api_token, job_id)
       query_hash = init_job_req_dict(api_token, job_id)
-      response = WebUtils.get_json(@base_url + GET_LIST_OF_ELEMENT_LISTS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return response
+      WebUtils.get_json(@base_url + GET_LIST_OF_ELEMENT_LISTS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
     end
 
     ##############################
@@ -224,7 +223,7 @@ module Cielo24
       query_hash = init_job_req_dict(api_token, job_id)
       query_hash[:media_url] = media_url
       response = WebUtils.get_json(@base_url + path, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return response['TaskId']
+      response['TaskId']
     end
 
     def init_job_req_dict(api_token, job_id)
@@ -237,7 +236,7 @@ module Cielo24
       init_version_dict.merge({api_token: api_token})
     end
 
-    def init_version_dict()
+    def init_version_dict
       {v: API_VERSION}
     end
 
@@ -245,6 +244,32 @@ module Cielo24
       if arg.nil?
         raise ArgumentError.new('Invalid argument - ' + arg_name)
       end
+    end
+
+    def fix_job_info_offsets(job_info)
+      top_keys = %w(CreationDate StartDate DueDate CompletedDate ReturnDate AuthorizationDate)
+      task_keys = %w(TaskRequestTime)
+      job_info = fix_offsets(job_info, top_keys)
+      job_info.Tasks = job_info.Tasks.map do |task_item|
+        fix_offsets(task_item, task_keys)
+      end
+      job_info
+    end
+
+    def fix_job_list_offsets(job_list)
+      keys = %w(CreationDate CreationTime StartDate StartTime DueDate CompletedDate
+                ReturnDate CompletedTime AuthorizationDate)
+      job_list.ActiveJobs = job_list.ActiveJobs.map do |job_item|
+        fix_offsets(job_item, keys)
+      end
+      job_list
+    end
+
+    def fix_offsets(hash, keys)
+      keys.each do |key|
+        hash[key] = WebUtils.to_utc(hash[key])
+      end
+      hash
     end
   end
 end
