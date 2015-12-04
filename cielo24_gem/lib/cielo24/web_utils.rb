@@ -58,7 +58,7 @@ module Cielo24
     end
 
     def to_s
-      "#{status_code}:#{@type} - #{super.to_s}"
+      "#{@status_code}:#{@type} - #{super.to_s}"
     end
   end
 
