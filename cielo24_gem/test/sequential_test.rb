@@ -8,7 +8,6 @@ include Cielo24
 
 class SequentialTest < ActionsTest
 
-  # Called before every test method runs. Can be used to set up fixture information.
   def setup
     # Do nothing - we want to be able to control when we login/logout etc.
   end
