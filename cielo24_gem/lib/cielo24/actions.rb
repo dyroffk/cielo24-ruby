@@ -79,7 +79,6 @@ module Cielo24
     end
 
     def generate_api_key(api_token, sub_account=nil, force_new=false)
-      assert_argument(username, 'Username')
       query_hash = init_access_req_dict(api_token)
       # account_id parameter named sub_account for clarity
       query_hash[:account_id] = sub_account unless sub_account.nil?
