@@ -5,11 +5,13 @@ module Cielo24
     require 'httpclient'
     require 'timeout'
     require 'logger'
+    require 'tzinfo'
     include JSON
 
     BASIC_TIMEOUT = 60           # seconds (1 minute)
     DOWNLOAD_TIMEOUT = 300       # seconds (5 minutes)
     UPLOAD_TIMEOUT = 60*60*24*7  # seconds (1 week)
+    SERVER_TZ = 'America/Los_Angeles'
     LOGGER = Logger.new(STDOUT)
 
     def self.get_json(uri, method, timeout, query=nil, headers=nil, body=nil)
@@ -41,6 +43,15 @@ module Cielo24
       rescue Timeout::Error
         raise TimeoutError.new('The HTTP session has timed out.')
       end
+    end
+
+    def self.to_utc(s)
+      return s if s.empty?
+      tz = TZInfo::Timezone.get(SERVER_TZ)
+      local = DateTime.iso8601(s)
+      utc = tz.local_to_utc local
+      format = '%Y-%m-%dT%H:%M:%S.%L%z' # iso8601 with milliseconds
+      utc.strftime(format)
     end
   end
 
