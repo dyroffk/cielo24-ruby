@@ -15,6 +15,17 @@ class JobTest < ActionsTest
     @job_id = @actions.create_job(@api_token, 'Ruby_test').JobId
   end
 
+  # Called after every test method runs. Can be used to tear down fixture information.
+  def teardown
+    super
+    # Delete job
+    begin
+      @actions.delete_job(@api_token, @job_id)
+    rescue
+      # Pass silently
+    end
+  end
+
   # Since all option classes extend BaseOptions class (with all of the functionality) we only need to test one class
   def test_options
     options = CaptionOptions.new
@@ -105,5 +116,17 @@ class JobTest < ActionsTest
     file = open(@config.sample_video_file_path, 'rb')
     @task_id = @actions.add_media_to_job_file(@api_token, @job_id, file)
     assert_equal(32, @task_id.length)
+  end
+
+  def test_aggregate_statistics
+    response = @actions.aggregate_statistics(@api_token,
+                                             metrics=%w(billable_minutes_total billable_minutes_professional),
+                                             group_by='month',
+                                             start_date='2015-06-25T00:00:00.000000',
+                                             end_date='2015-07-25T00:00:00.000000',
+                                             account_id='*')
+    assert_equal(response.data.length, 2)
+    assert(response.data[0].has_key?('billable_minutes_total'))
+    assert(response.data[0].has_key?('billable_minutes_professional'))
   end
 end

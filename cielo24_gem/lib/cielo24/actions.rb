@@ -31,6 +31,7 @@ module Cielo24
     GET_CAPTION_PATH = '/api/job/get_caption'
     GET_ELEMENT_LIST_PATH = '/api/job/get_elementlist'
     GET_LIST_OF_ELEMENT_LISTS_PATH = '/api/job/list_elementlists'
+    AGGREGATE_STATISTICS_PATH = '/api/job/aggregate_statistics'
 
     def initialize(base_url='https://api.cielo24.com')
       @base_url = base_url
@@ -77,10 +78,10 @@ module Cielo24
       WebUtils.http_request(@base_url + UPDATE_PASSWORD_PATH, 'POST', WebUtils::BASIC_TIMEOUT, nil, nil, query_hash)
     end
 
-    def generate_api_key(api_token, username, force_new=false)
-      assert_argument(username, 'Username')
+    def generate_api_key(api_token, sub_account=nil, force_new=false)
       query_hash = init_access_req_dict(api_token)
-      query_hash[:account_id] = username
+      # account_id parameter named sub_account for clarity
+      query_hash[:account_id] = sub_account unless sub_account.nil?
       query_hash[:force_new] = force_new
       response = WebUtils.get_json(@base_url + GENERATE_API_KEY_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
       response['ApiKey']
@@ -211,6 +212,18 @@ module Cielo24
     def get_list_of_element_lists(api_token, job_id)
       query_hash = init_job_req_dict(api_token, job_id)
       WebUtils.get_json(@base_url + GET_LIST_OF_ELEMENT_LISTS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
+    end
+
+    def aggregate_statistics(api_token, metrics=nil, group_by=nil, start_date=nil, end_date=nil, sub_account=nil)
+      query_hash = init_access_req_dict(api_token)
+      query_hash[:metrics] = metrics.to_json unless metrics.nil?
+      query_hash[:group_by] = group_by unless group_by.nil?
+      query_hash[:start_date] = start_date unless start_date.nil?
+      query_hash[:end_date] = end_date unless end_date.nil?
+      # account_id parameter named sub_account for clarity
+      query_hash[:account_id] = sub_account unless sub_account.nil?
+      response = WebUtils.get_json(@base_url + AGGREGATE_STATISTICS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
+      return Mash.new(response)
     end
 
     ##############################
