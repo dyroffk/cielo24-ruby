@@ -7,6 +7,7 @@ module Cielo24
     require 'logger'
     require 'tzinfo'
     include JSON
+    include TZInfo
 
     BASIC_TIMEOUT = 60           # seconds (1 minute)
     DOWNLOAD_TIMEOUT = 300       # seconds (5 minutes)
@@ -35,12 +36,8 @@ module Cielo24
           if response.status_code == 200 or response.status_code == 204
             return response.body
           else
-            begin
-              json = JSON.parse(response.body)
-              raise WebError.new(response.status_code, json['ErrorType'], json['ErrorComment'])
-            rescue JSON::ParserError
-              raise WebError.new(response.status_code, ErrorType::UNKNOWN, "Response: #{response.body}")
-            end
+            json = json_parse(response.body)
+            raise WebError.new(response.status_code, json['ErrorType'], json['ErrorComment'])
           end
 
         }
@@ -51,21 +48,35 @@ module Cielo24
 
     def self.to_utc(s)
       return s if s.empty?
-      tz = TZInfo::Timezone.get(SERVER_TZ)
+      tz = Timezone.get(SERVER_TZ)
       local = DateTime.iso8601(s)
       utc = tz.local_to_utc local
       format = '%Y-%m-%dT%H:%M:%S.%L%z' # iso8601 with milliseconds
       utc.strftime(format)
     end
+
+    def self.json_parse(s)
+      begin
+        return JSON.parse(s)
+      rescue JSON::ParserError
+        raise CieloError.new('PARSING_ERROR', "Response: #{s}")
+      end
+    end
   end
 
-  class WebError < StandardError
-    attr_reader :status_code
+  class CieloError < StandardError
     attr_reader :type
-    def initialize(status_code, type, comment)
+    def initialize(type, comment)
       super(comment)
-      @status_code = status_code
       @type = type
+    end
+  end
+
+  class WebError < CieloError
+    attr_reader :status_code
+    def initialize(status_code, type, comment)
+      super(type, comment)
+      @status_code = status_code
     end
 
     def to_s
@@ -73,9 +84,9 @@ module Cielo24
     end
   end
 
-  class TimeoutError < StandardError
+  class TimeoutError < CieloError
     def initialize(message)
-      super(message)
+      super('TIMEOUT_ERROR', message)
     end
   end
 end
