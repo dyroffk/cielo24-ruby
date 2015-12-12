@@ -70,6 +70,10 @@ module Cielo24
       super(comment)
       @type = type
     end
+
+    def to_s
+      "#{@type} - #{super.to_s}"
+    end
   end
 
   class WebError < CieloError
@@ -80,7 +84,7 @@ module Cielo24
     end
 
     def to_s
-      "#{@status_code}:#{@type} - #{super.to_s}"
+      "#{@status_code}:#{super.to_s}"
     end
   end
 
