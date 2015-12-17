@@ -17,7 +17,7 @@ module Cielo24
 
     def self.get_json(uri, method, timeout, query=nil, headers=nil, body=nil)
       response = http_request(uri, method, timeout, query, headers, body)
-      return JSON.parse(response)
+      return json_parse(response)
     end
 
     def self.http_request(uri, method, timeout, query=nil, headers=nil, body=nil)
@@ -59,7 +59,7 @@ module Cielo24
       begin
         return JSON.parse(s)
       rescue JSON::ParserError
-        raise CieloError.new('PARSING_ERROR', "Response: #{s}")
+        raise ParsingError.new("Bad JSON String: \"#{s}\"")
       end
     end
   end
@@ -91,6 +91,12 @@ module Cielo24
   class TimeoutError < CieloError
     def initialize(message)
       super('TIMEOUT_ERROR', message)
+    end
+  end
+
+  class ParsingError < CieloError
+    def initialize(message)
+      super('PARSING_ERROR', message)
     end
   end
 end
