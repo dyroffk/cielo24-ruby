@@ -7,6 +7,7 @@ module Cielo24
     require 'logger'
     require 'tzinfo'
     include JSON
+    include TZInfo
 
     BASIC_TIMEOUT = 60           # seconds (1 minute)
     DOWNLOAD_TIMEOUT = 300       # seconds (5 minutes)
@@ -16,7 +17,7 @@ module Cielo24
 
     def self.get_json(uri, method, timeout, query=nil, headers=nil, body=nil)
       response = http_request(uri, method, timeout, query, headers, body)
-      return JSON.parse(response)
+      return json_parse(response)
     end
 
     def self.http_request(uri, method, timeout, query=nil, headers=nil, body=nil)
@@ -35,8 +36,8 @@ module Cielo24
           if response.status_code == 200 or response.status_code == 204
             return response.body
           else
-            json = JSON.parse(response.body)
-            raise WebError.new(json['ErrorType'], json['ErrorComment'])
+            json = json_parse(response.body)
+            raise WebError.new(response.status_code, json['ErrorType'], json['ErrorComment'])
           end
 
         }
@@ -47,15 +48,23 @@ module Cielo24
 
     def self.to_utc(s)
       return s if s.empty?
-      tz = TZInfo::Timezone.get(SERVER_TZ)
+      tz = Timezone.get(SERVER_TZ)
       local = DateTime.iso8601(s)
       utc = tz.local_to_utc local
       format = '%Y-%m-%dT%H:%M:%S.%L%z' # iso8601 with milliseconds
       utc.strftime(format)
     end
+
+    def self.json_parse(s)
+      begin
+        return JSON.parse(s)
+      rescue JSON::ParserError
+        raise ParsingError.new("Bad JSON String: \"#{s}\"")
+      end
+    end
   end
 
-  class WebError < StandardError
+  class CieloError < StandardError
     attr_reader :type
     def initialize(type, comment)
       super(comment)
@@ -63,13 +72,31 @@ module Cielo24
     end
 
     def to_s
-      return @type + ' - ' + super.to_s
+      "#{@type} - #{super.to_s}"
     end
   end
 
-  class TimeoutError < StandardError
+  class WebError < CieloError
+    attr_reader :status_code
+    def initialize(status_code, type, comment)
+      super(type, comment)
+      @status_code = status_code
+    end
+
+    def to_s
+      "#{@status_code}:#{super.to_s}"
+    end
+  end
+
+  class TimeoutError < CieloError
     def initialize(message)
-      super(message)
+      super('TIMEOUT_ERROR', message)
+    end
+  end
+
+  class ParsingError < CieloError
+    def initialize(message)
+      super('PARSING_ERROR', message)
     end
   end
 end

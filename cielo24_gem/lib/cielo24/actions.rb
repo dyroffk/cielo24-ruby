@@ -223,7 +223,7 @@ module Cielo24
       # account_id parameter named sub_account for clarity
       query_hash[:account_id] = sub_account unless sub_account.nil?
       response = WebUtils.get_json(@base_url + AGGREGATE_STATISTICS_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
-      return Mash.new(response)
+      Mash.new(response)
     end
 
     ##############################
