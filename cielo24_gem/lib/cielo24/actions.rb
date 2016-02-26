@@ -20,6 +20,7 @@ module Cielo24
     REMOVE_API_KEY_PATH = '/api/account/remove_api_key'
     CREATE_JOB_PATH = '/api/job/new'
     AUTHORIZE_JOB_PATH = '/api/job/authorize'
+    MODIFY_JOB_PATH = '/api/job/modify'
     DELETE_JOB_PATH = '/api/job/del'
     GET_JOB_INFO_PATH = '/api/job/info'
     GET_JOB_LIST_PATH = '/api/job/list'
@@ -116,6 +117,14 @@ module Cielo24
       query_hash = init_job_req_dict(api_token, job_id)
       # Nothing returned
       WebUtils.http_request(@base_url + AUTHORIZE_JOB_PATH, 'GET', WebUtils::BASIC_TIMEOUT, query_hash)
+    end
+
+    def modify_job(api_token, job_id, fidelity=nil, turnaround_hours=nil, priority=nil)
+      query_hash = init_job_req_dict(api_token, job_id)
+      query_hash[:transcription_fidelity] = fidelity unless fidelity.nil?
+      query_hash[:priority] = priority unless priority.nil?
+      query_hash[:turnaround_hours] = turnaround_hours unless turnaround_hours.nil?
+      WebUtils.http_request(@base_url + MODIFY_JOB_PATH, 'POST', WebUtils::BASIC_TIMEOUT, query_hash)
     end
 
     def delete_job(api_token, job_id)

@@ -139,6 +139,24 @@ module Cielo24Cli
       puts 'Authorized successfully'
     end
 
+    desc 'modify_job', 'Modify a job'
+    option *job_id_option
+    option *fidelity_option
+    option *turn_around_hours_option
+    option *priority_option
+    # always required (hidden)
+    option *username_option
+    option *password_option
+    option *securekey_option
+    option *api_token_option
+    def modify_job
+      puts 'Modifying job parameters...'
+      actions = initialize_actions
+      token = get_token(actions)
+      actions.modify_job(token, options[:j], fidelity=options[:f], turnaround_hours=options[:T], priority=options[:P])
+      puts 'Job modified successfully'
+    end
+
     desc 'add_media_to_job', 'Add media to job'
     option *job_id_option
     option *media_url_option

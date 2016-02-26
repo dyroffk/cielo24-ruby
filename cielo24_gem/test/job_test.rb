@@ -46,6 +46,13 @@ class JobTest < ActionsTest
     @actions.authorize_job(@api_token, @job_id)
   end
 
+  def test_modify_job
+    @actions.modify_job(@api_token, @job_id,
+                        fidelity=Fidelity::PROFESSIONAL,
+                        turnaround_hours=36,
+                        priority=Priority::ECONOMY)
+  end
+
   def test_delete_job
     @task_id = @actions.delete_job(@api_token, @job_id)
     assert_equal(32, @task_id.length)
